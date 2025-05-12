@@ -9,7 +9,7 @@
       fx:controller="edu.angelpina.physiocare.Controllers.PhysiosController">
     <ListView fx:id="physiosList" prefHeight="400.0" prefWidth="600.0"/>
     <HBox alignment="CENTER" spacing="10.0">
-        <Button text="Add Patient" onAction="#addPhysio"/>
+        <Button fx:id="btnAdd" text="Add Patient" onAction="#addPhysio"/>
         <Button text="Back to Title" onAction="#goToTitle"/>
     </HBox>
 </VBox>

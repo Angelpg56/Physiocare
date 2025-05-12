@@ -11,8 +11,9 @@
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
     </padding>
 
-    <Label fx:id="welcomeText"/>
+    <Label fx:id="welcomeText" text="Welcome to Physiocare"/>
     <Button text="Go to Patients" onAction="#goToPatients"/>
-    <Button text="Go to Records" onAction="#goToRecords"/>
     <Button text="Go to Physios" onAction="#goToPhysios"/>
+    <Button fx:id="btnLogin" text="Login" onAction="#login"/>
+    <Button fx:id="btnLogout" text="Logout" onAction="#logout"/>
 </VBox>

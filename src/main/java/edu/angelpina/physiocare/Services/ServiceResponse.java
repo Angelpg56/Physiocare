@@ -5,6 +5,8 @@
  */
 package edu.angelpina.physiocare.Services;
 
+import edu.angelpina.physiocare.Models.User;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -15,14 +17,25 @@ import java.util.zip.GZIPInputStream;
 public class ServiceResponse
 {
     private static String token = null;
-    public static final String SERVER = "http://angelpg.es:8080";
+    private static User actualUser = null;
+    public static final String SERVER = "https://angelpg.es/physio/api";
+    //public static final String SERVER = "http://localhost:8080";
 
     public static void setToken(String token) {
         ServiceResponse.token = token;
     }
-    
     public static void removeToken() {
         ServiceResponse.token = null;
+    }
+    public static boolean isToken() {
+        return token != null && !token.isEmpty();
+    }
+
+    public static void setActualUser(User user) {
+        actualUser = user;
+    }
+    public static String getUserRol() {
+        return actualUser.getRol();
     }
 
     // Get charset encoding (UTF-8, ISO,...)

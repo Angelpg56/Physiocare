@@ -20,17 +20,16 @@ import javafx.stage.Stage;
 import edu.angelpina.physiocare.Utils.MessageUtils;
 
 import java.io.IOException;
+import java.nio.file.SecureDirectoryStream;
 import java.util.Optional;
 
 public class PhysiosController {
     public ListView physiosList;
+    public Button btnAdd;
     Gson gson = new Gson();
 
     @FXML
     public void initialize() {
-        // Set the token for authentication
-        ServiceResponse.setToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6bnVsbCwibG9naW4iOiJhZG1pbiIsInJvbCI6ImFkbWluIiwiaWF0IjoxNzQ0NjQ3MTQ5LCJleHAiOjE3NDQ2NTQzNDl9.9PPSzHBK8Eob8ogzKi7X9ZRO5xJL9ERgnmEV-5sU2Sk");
-
         String url = ServiceResponse.SERVER + "/physios";
         ServiceResponse.getResponseAsync(url, null, "GET")
                 .thenApply(json -> gson.fromJson(json, PhysiosResponse.class))
@@ -55,6 +54,10 @@ public class PhysiosController {
                     Platform.runLater(() -> MessageUtils.showError("Error", "Failed to fetch physios"));
                     return null;
                 });
+
+        if(ServiceResponse.getUserRol().equals("physio")) {
+            btnAdd.setDisable(true);
+        }
     }
 
     public void ActionDialog(Physio physio) {

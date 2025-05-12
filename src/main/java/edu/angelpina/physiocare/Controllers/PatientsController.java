@@ -31,7 +31,6 @@ public class PatientsController {
 
     @FXML
     public void initialize() {
-        ServiceResponse.setToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6bnVsbCwibG9naW4iOiJhZG1pbiIsInJvbCI6ImFkbWluIiwiaWF0IjoxNzQ0NjQ3MTQ5LCJleHAiOjE3NDQ2NTQzNDl9.9PPSzHBK8Eob8ogzKi7X9ZRO5xJL9ERgnmEV-5sU2Sk");
         String url = ServiceResponse.SERVER + "/patients";
         ServiceResponse.getResponseAsync(url, null, "GET")
                 .thenApply(json -> gson.fromJson(json, PatientsResponse.class))
