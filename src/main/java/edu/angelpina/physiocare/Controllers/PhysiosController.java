@@ -37,6 +37,7 @@ public class PhysiosController {
                     if (response.isOk()) {
                         Platform.runLater(() -> {
                             physiosList.getItems().setAll(response.getResultado());
+
                             physiosList.setOnMouseClicked(event -> {
                                 if (event.getClickCount() == 2) {
                                     Physio selectedPhysio = (Physio) physiosList.getSelectionModel().getSelectedItem();
@@ -63,23 +64,43 @@ public class PhysiosController {
     public void ActionDialog(Physio physio) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Physio Action");
-        alert.setHeaderText("Choose an action for " + physio.getName() + " " + physio.getSurname());
-        alert.setContentText("Select an option:");
+        alert.setHeaderText("Details of " + physio.getName() + " " + physio.getSurname());
 
-        ButtonType editButton = new ButtonType("Edit");
-        ButtonType deleteButton = new ButtonType("Delete");
-        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        // Create the form
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
 
-        alert.getButtonTypes().setAll(editButton, deleteButton, cancelButton);
+        grid.add(new Label("Full name:"), 0, 0);
+        grid.add(new Label(physio.getName() + " " + physio.getSurname()), 1, 0);
+        grid.add(new Label("Email:"), 0, 1);
+        grid.add(new Label(physio.getEmail()), 1, 1);
+        grid.add(new Label("Speciality:"), 0, 2);
+        grid.add(new Label(physio.getSpecialty()), 1, 2);
+        grid.add(new Label("License Nº:"), 0, 3);
+        grid.add(new Label(physio.getLicenseNumber()), 1, 3);
 
-        alert.showAndWait().ifPresent(buttonType -> {
-            if (buttonType == editButton) {
-                editPhysio(physio);
-            } else if (buttonType == deleteButton) {
-                deletePhysio(physio);
-            }
-            // Cancel button closes the popup automatically
-        });
+        alert.getDialogPane().setContent(grid);
+
+        if(ServiceResponse.getUserRol().equals("admin")) {
+            alert.setContentText("Select an option:");
+
+            ButtonType editButton = new ButtonType("Edit");
+            ButtonType deleteButton = new ButtonType("Delete");
+            ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+            alert.getButtonTypes().setAll(editButton, deleteButton, cancelButton);
+
+            alert.showAndWait().ifPresent(buttonType -> {
+                if (buttonType == editButton) {
+                    editPhysio(physio);
+                } else if (buttonType == deleteButton) {
+                    deletePhysio(physio);
+                }
+                // Cancel button closes the popup automatically
+            });
+        }
     }
 
     private void showPhysioForm(Physio physio) {

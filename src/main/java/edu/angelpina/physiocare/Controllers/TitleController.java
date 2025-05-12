@@ -128,6 +128,7 @@ public class TitleController implements Initializable {
                                     if(!response.getUser().getRol().equals("patient")) {
                                         MessageUtils.showMessage("Success", "User Logged Correctly");
                                         ServiceResponse.setToken(response.getToken());
+                                        ServiceResponse.setActualUser(response.getUser());
                                         btnLogin.setDisable(true);
                                         btnLogout.setDisable(false);
 
