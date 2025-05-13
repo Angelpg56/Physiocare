@@ -2,14 +2,13 @@ package edu.angelpina.physiocare.Models;
 
 import java.util.Date;
 
-public class Consult {
+public class Appointment {
     private String _id;
     private Date date;
-    private String physio;
+    private Physio physio;
     private String diagnosis;
     private String treatment;
     private String observations;
-    private int __v;
 
     public String get_id() {
         return _id;
@@ -27,11 +26,11 @@ public class Consult {
         this.date = date;
     }
 
-    public String getPhysio() {
+    public Physio getPhysio() {
         return physio;
     }
 
-    public void setPhysio(String physio) {
+    public void setPhysio(Physio physio) {
         this.physio = physio;
     }
 
@@ -59,18 +58,10 @@ public class Consult {
         this.observations = observations;
     }
 
-    public int get__v() {
-        return __v;
-    }
-
-    public void set__v(int __v) {
-        this.__v = __v;
-    }
-
     @Override
     public String toString() {
         return "date=" + this.date +
-                ": physio=" + this.physio + " " + this.physio +
+                ": physio=" + this.physio.getName() + " " + this.physio.getSurname() +
                 " - diagnosis='" + this.diagnosis + '\'' +
                 " - treatment='" + this.treatment + '\'' +
                 " - observations='" + this.observations + '\'';
@@ -80,10 +71,11 @@ public class Consult {
         java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd");
         return "{" +
                 "\"date\":\"" + (this.date != null ? dateFormat.format(this.date) : null) + "\"," +
-                "\"physio\":\"" + this.physio + "\"," +
+                "\"physio\":\"" + this.physio.toJson() + "\"," +
                 "\"diagnosis\":\"" + this.diagnosis + "\"," +
                 "\"treatment\":\"" + this.treatment + "\"," +
                 "\"observations\":\"" + this.observations + "\"" +
+                "\"_id\":\"" + this._id + "\"" +
                 "}";
     }
 }

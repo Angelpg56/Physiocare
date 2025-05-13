@@ -23,11 +23,15 @@ import java.util.Date;
 import java.util.Optional;
 
 public class PatientsController {
-
+    public Stage stage;
     public ListView patientsList;
     Gson gson = new Gson();
     private String user;
     private String pass;
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
 
     @FXML
     public void initialize() {
@@ -36,8 +40,6 @@ public class PatientsController {
                 .thenApply(json -> gson.fromJson(json, PatientsResponse.class))
                 .thenAccept(response -> {
                     if (response.isOk()) {
-                        onePatient(response.getResultado().getFirst().getId());
-                        postConsult("67fd33cb660d1673874c7f3c");
 
                         Platform.runLater(() -> {
                             patientsList.getItems().setAll(response.getResultado());
@@ -67,20 +69,38 @@ public class PatientsController {
         alert.setHeaderText("Choose an action for " + patient.getName() + " " + patient.getSurname());
         alert.setContentText("Select an option:");
 
+        ButtonType recordsButton = new ButtonType("Records");
         ButtonType editButton = new ButtonType("Edit");
         ButtonType deleteButton = new ButtonType("Delete");
         ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
 
-        alert.getButtonTypes().setAll(editButton, deleteButton, cancelButton);
+        alert.getButtonTypes().setAll(recordsButton, editButton, deleteButton, cancelButton);
 
         alert.showAndWait().ifPresent(buttonType -> {
             if (buttonType == editButton) {
                 editPatient(patient);
             } else if (buttonType == deleteButton) {
                 deletePatient(patient);
+            } else if (buttonType == recordsButton) {
+                showRecords(patient);
             }
             // Cancel button closes the popup automatically
         });
+    }
+
+    private void showRecords(Patient patient) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/edu/angelpina/physiocare/Records.fxml"));
+            Parent root = loader.load();
+            RecordsController controller = loader.getController();
+            controller.setPatient(patient);
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            MessageUtils.showError("Error", "Failed to load Records view");
+        }
     }
 
     private void showPatientForm(Patient patient) {

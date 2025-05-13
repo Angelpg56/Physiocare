@@ -133,19 +133,23 @@ public class TitleController implements Initializable {
                                         btnLogout.setDisable(false);
 
                                         if (redirect != null) {
-                                            String resource = redirect.equals("Patients") ?
+                                            String resource = redirect.equals("Patient") ?
                                                     "/edu/angelpina/physiocare/Patients.fxml" :
                                                     "/edu/angelpina/physiocare/Physios.fxml";
                                             Parent root = null;
+                                            System.out.println(resource);
                                             try {
-                                                root = FXMLLoader.load(getClass().getResource(resource));
+                                                FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
+                                                root = loader.load();
+                                                stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                                                scene = new Scene(root);
+                                                PatientsController controller = loader.getController();
+                                                controller.setStage(stage);
+                                                stage.setScene(scene);
+                                                stage.show();
                                             } catch (IOException e) {
                                                 throw new RuntimeException(e);
                                             }
-                                            stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                                            scene = new Scene(root);
-                                            stage.setScene(scene);
-                                            stage.show();
                                         }
                                     } else {
                                         MessageUtils.showMessage("Unauthorised", "This user cant operate this application");
@@ -163,8 +167,9 @@ public class TitleController implements Initializable {
             });
         } else {
             if(redirect != null) {
-                String resource = "/edu/angelpina/physiocare/" + (redirect.equals("Patients") ?
-                        "Patients.fxml" : "Physios.fxml");
+                String resource = redirect.equals("Patient") ?
+                        "/edu/angelpina/physiocare/Patients.fxml" :
+                        "/edu/angelpina/physiocare/Physios.fxml";
                 Parent root;
                 try {
                     root = FXMLLoader.load(getClass().getResource(resource));
