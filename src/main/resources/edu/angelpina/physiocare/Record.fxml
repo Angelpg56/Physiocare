@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="edu.angelpina.physiocare.Controllers.RecordController">
+    <Label fx:id="titleLabel" text="Patient Records" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+    <Label fx:id="medicalRecordLabel" text="Medical Record: " style="-fx-font-size: 16px;"/>
+    <ListView fx:id="appointmentList" prefHeight="400.0" prefWidth="600.0"/>
+    <HBox alignment="CENTER" spacing="10.0">
+        <Button text="Add Patient" onAction="#addRecord"/>
+        <Button text="Back to Title" onAction="#goToTitle"/>
+    </HBox>
+</VBox>
