@@ -74,10 +74,8 @@ public class Physio {
     public String toString() {
         return this.name + " " +
                 this.surname + " - " +
-                this.email + " - " +
                 this.specialty + " - " +
-                this.licenseNumber + " - " +
-                this._id;
+                this.licenseNumber;
     }
 
     public String toJson() {

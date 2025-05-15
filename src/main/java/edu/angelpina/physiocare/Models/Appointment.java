@@ -10,6 +10,14 @@ public class Appointment {
     private String treatment;
     private String observations;
 
+    public Appointment(Date date, Physio physio, String diagnosis, String treatment, String observations) {
+        this.date = date;
+        this.physio = physio;
+        this.diagnosis = diagnosis;
+        this.treatment = treatment;
+        this.observations = observations;
+    }
+
     public String get_id() {
         return _id;
     }
@@ -62,20 +70,17 @@ public class Appointment {
     public String toString() {
         return "date=" + this.date +
                 ": physio=" + this.physio.getName() + " " + this.physio.getSurname() +
-                " - diagnosis='" + this.diagnosis + '\'' +
-                " - treatment='" + this.treatment + '\'' +
-                " - observations='" + this.observations + '\'';
+                " - diagnosis='" + this.diagnosis + '\'';
     }
 
     public String toJson() {
         java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd");
         return "{" +
                 "\"date\":\"" + (this.date != null ? dateFormat.format(this.date) : null) + "\"," +
-                "\"physio\":\"" + this.physio.toJson() + "\"," +
+                "\"physio\":\"" + this.physio.getId() + "\"," +
                 "\"diagnosis\":\"" + this.diagnosis + "\"," +
                 "\"treatment\":\"" + this.treatment + "\"," +
                 "\"observations\":\"" + this.observations + "\"" +
-                "\"_id\":\"" + this._id + "\"" +
                 "}";
     }
 }

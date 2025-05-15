@@ -85,11 +85,7 @@ public class Patient {
         String formattedDate = (birthDate != null) ? dateFormat.format(birthDate) : "N/A";
         return this.name + " " +
                 this.surname + " - " +
-                this.email + " - " +
-                formattedDate + " - " +
-                this.address + " - " +
-                this.insuranceNumber + " - " +
-                this._id;
+                this.insuranceNumber;
     }
 
     public String toJson() {

@@ -1,8 +1,9 @@
 package edu.angelpina.physiocare.Controllers;
 
-import edu.angelpina.physiocare.Models.Appointment;
-import edu.angelpina.physiocare.Models.Patient;
+import com.google.gson.Gson;
+import edu.angelpina.physiocare.Models.*;
 import edu.angelpina.physiocare.Models.Record;
+import edu.angelpina.physiocare.Services.ServiceResponse;
 import edu.angelpina.physiocare.Utils.MessageUtils;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -17,6 +18,10 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class RecordController {
     public Label titleLabel;
@@ -24,6 +29,7 @@ public class RecordController {
     public Label medicalRecordLabel;
     private Stage stage;
     private Scene scene;
+    Gson gson = new Gson();
     private Record record;
     private Patient patient;
 
@@ -32,7 +38,6 @@ public class RecordController {
 
         if (this.patient != null) {
             System.out.println("Patient ID: " + this.patient.getId());
-            // Populate the view with patient data
         } else {
             System.out.println("Patient is null");
         }
@@ -99,29 +104,120 @@ public class RecordController {
 
         alert.getDialogPane().setContent(grid);
 
-        //ButtonType recordsButton = new ButtonType("Records");
-        //ButtonType editButton = new ButtonType("Edit");
-        //ButtonType deleteButton = new ButtonType("Delete");
-        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-
-        //alert.getButtonTypes().setAll(recordsButton, editButton, deleteButton, cancelButton);
-
-        alert.showAndWait().ifPresent(buttonType -> {
-            /*if (buttonType == editButton) {
-                editPatient(patient);
-            } else if (buttonType == deleteButton) {
-                deletePatient(patient);
-            } else if (buttonType == recordsButton) {
-                showRecords(patient);
-            }*/
-            // Cancel button closes the popup automatically
-        });
+        alert.showAndWait();
     }
 
-    public void addRecord(ActionEvent event) {
+    public void addAppointment(ActionEvent event) {
+        String url1 = ServiceResponse.SERVER + "/physios";
+        ServiceResponse.getResponseAsync(url1, null, "GET")
+                .thenApply(json -> gson.fromJson(json, PhysiosResponse.class))
+                .thenAccept(response -> {
+                    if (response.isOk()) {
+                        Platform.runLater(() -> {
+                            List<Physio> physiosList = response.getResultado();
+
+                            Dialog<Appointment> dialog = new Dialog<>();
+                            dialog.setTitle("Add Appointment");
+                            dialog.setHeaderText("Fill the form to add a new appointment for " + patient.getName() + " " + patient.getSurname());
+
+                            ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+                            dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+
+                            GridPane grid = new GridPane();
+                            grid.setHgap(10);
+                            grid.setVgap(10);
+                            grid.setPadding(new Insets(20, 150, 10, 10));
+
+                            DatePicker dateField = new DatePicker();
+                            TextField diagnosisField = new TextField();
+                            diagnosisField.setPromptText("Diagnosis");
+                            TextField treatmentField = new TextField();
+                            treatmentField.setPromptText("Treatment");
+                            TextArea observationsField = new TextArea();
+                            observationsField.setPromptText("Observations");
+                            observationsField.setWrapText(true);
+
+                            ComboBox<Physio> physioComboBox = new ComboBox<>();
+                            physioComboBox.getItems().addAll(physiosList);
+                            physioComboBox.setPromptText("Select Physio");
+
+                            grid.add(new Label("Date:"), 0, 0);
+                            grid.add(dateField, 1, 0);
+                            grid.add(new Label("Diagnosis:"), 0, 1);
+                            grid.add(diagnosisField, 1, 1);
+                            grid.add(new Label("Treatment:"), 0, 2);
+                            grid.add(treatmentField, 1, 2);
+                            grid.add(new Label("Observations:"), 0, 3);
+                            grid.add(observationsField, 1, 3);
+                            grid.add(new Label("Physio:"), 0, 4);
+                            grid.add(physioComboBox, 1, 4);
+
+                            dialog.getDialogPane().setContent(grid);
+
+                            Node saveButton = dialog.getDialogPane().lookupButton(saveButtonType);
+                            saveButton.setDisable(true);
+
+                            // Validation
+                            dateField.valueProperty().addListener((observable, oldValue, newValue) -> {
+                                saveButton.setDisable(newValue == null || diagnosisField.getText().trim().isEmpty() || physioComboBox.getValue() == null);
+                            });
+
+                            diagnosisField.textProperty().addListener((observable, oldValue, newValue) -> {
+                                saveButton.setDisable(newValue.trim().isEmpty() || dateField.getValue() == null || physioComboBox.getValue() == null);
+                            });
+
+                            physioComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+                                saveButton.setDisable(newValue == null || dateField.getValue() == null || diagnosisField.getText().trim().isEmpty());
+                            });
+
+                            dialog.setResultConverter(dialogButton -> {
+                                if (dialogButton == saveButtonType) {
+                                    return new Appointment(
+                                            Date.valueOf(dateField.getValue()),
+                                            physioComboBox.getValue(),
+                                            diagnosisField.getText(),
+                                            treatmentField.getText(),
+                                            observationsField.getText()
+                                    );
+                                }
+                                return null;
+                            });
+
+                            Optional<Appointment> result = dialog.showAndWait();
+                            result.ifPresent(newAppointment -> {
+                                // Send the new appointment to the server
+                                String url2 = ServiceResponse.SERVER + "/records/" + record.get_id() + "/appointments";
+                                System.out.println("URL: " + url2);
+                                ServiceResponse.getResponseAsync(url2, newAppointment.toJson(), "POST")
+                                        .thenApply(json -> gson.fromJson(json, RecordResponse.class))
+                                        .thenAccept(response2 -> {
+                                            if (response2.isOk()) {
+                                                Platform.runLater(() -> {
+                                                    this.record = response2.getResultado();
+                                                    MessageUtils.showMessage("Success", "Appointment Created successfully");
+                                                    initialize(); // Reload the appointments list
+                                                });
+                                            } else {
+                                                Platform.runLater(() -> MessageUtils.showError("Error", response2.getError()));
+                                            }
+                                        })
+                                        .exceptionally(ex -> {
+                                            Platform.runLater(() -> MessageUtils.showError("Error", "Failed to create Appointment"));
+                                            return null;
+                                        });
+                            });
+                        });
+                    } else {
+                        Platform.runLater(() -> MessageUtils.showError("Error", response.getError()));
+                    }
+                })
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> MessageUtils.showError("Error", "Failed to fetch physios"));
+                    return null;
+                });
     }
 
-    public void goToTitle(ActionEvent event) {
+    public void goBack(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/edu/angelpina/physiocare/Records.fxml"));
             Parent root = loader.load();

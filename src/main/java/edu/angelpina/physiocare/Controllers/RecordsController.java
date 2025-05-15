@@ -1,9 +1,7 @@
 package edu.angelpina.physiocare.Controllers;
 
 import com.google.gson.Gson;
-import edu.angelpina.physiocare.Models.Appointment;
-import edu.angelpina.physiocare.Models.Patient;
-import edu.angelpina.physiocare.Models.RecordResponse;
+import edu.angelpina.physiocare.Models.*;
 import edu.angelpina.physiocare.Models.Record;
 import edu.angelpina.physiocare.Services.ServiceResponse;
 import edu.angelpina.physiocare.Utils.MessageUtils;
@@ -20,9 +18,10 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class RecordsController {
-    public ListView appointmentList;
+    public ListView recordsList;
     public Label titleLabel;
     public Label medicalRecordLabel;
     private Stage stage;
@@ -66,14 +65,14 @@ public class RecordsController {
         titleLabel.setText("Records of " + patient.getName());
         String url = ServiceResponse.SERVER + "/records/patient/" + patient.getId();
         ServiceResponse.getResponseAsync(url, null, "GET")
-                .thenApply(json -> gson.fromJson(json, RecordResponse.class))
+                .thenApply(json -> gson.fromJson(json, RecordsResponse.class))
                 .thenAccept(response -> {
                     if (response.isOk()) {
                         Platform.runLater(() -> {
-                            appointmentList.getItems().setAll(response.getResultado());
-                            appointmentList.setOnMouseClicked(event -> {
+                            recordsList.getItems().setAll(response.getResultado());
+                            recordsList.setOnMouseClicked(event -> {
                                 if (event.getClickCount() == 2) {
-                                    Record selectedRecord = (Record) appointmentList.getSelectionModel().getSelectedItem();
+                                    Record selectedRecord = (Record) recordsList.getSelectionModel().getSelectedItem();
                                     if (selectedRecord != null) {
                                         ActionDialog(selectedRecord);
                                     }
@@ -110,16 +109,13 @@ public class RecordsController {
         alert.getDialogPane().setContent(grid);
 
         ButtonType detailsButton = new ButtonType("See More");
-        ButtonType editButton = new ButtonType("Edit");
         ButtonType deleteButton = new ButtonType("Delete");
         ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
 
-        alert.getButtonTypes().setAll(detailsButton, editButton, deleteButton, cancelButton);
+        alert.getButtonTypes().setAll(detailsButton, deleteButton, cancelButton);
 
         alert.showAndWait().ifPresent(buttonType -> {
-            if (buttonType == editButton) {
-                editRecord(record);
-            } else if (buttonType == deleteButton) {
+            if (buttonType == deleteButton) {
                 deleteRecord(record);
             } else if(buttonType == detailsButton) {
                 seeDetails(record);
@@ -148,9 +144,23 @@ public class RecordsController {
     }
 
     private void deleteRecord(Record record) {
-    }
-
-    private void editRecord(Record record) {
+        String url = ServiceResponse.SERVER + "/records/" + record.get_id();
+        ServiceResponse.getResponseAsync(url, null, "DELETE")
+                .thenApply(json -> gson.fromJson(json, PhysioResponse.class))
+                .thenAccept(response -> {
+                    if (response.isOk()) {
+                        Platform.runLater(() -> {
+                            MessageUtils.showMessage("Success", "Record deleted successfully");
+                            recordsList.getItems().remove(record);
+                        });
+                    } else {
+                        Platform.runLater(() -> MessageUtils.showError("Error", response.getError()));
+                    }
+                })
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> MessageUtils.showError("Error", "Failed to delete Records"));
+                    return null;
+                });
     }
 
     public void goToTitle(ActionEvent event) throws IOException {
@@ -170,5 +180,60 @@ public class RecordsController {
     }
 
     public void addRecord(ActionEvent event) {
+        Dialog<Record> dialog = new Dialog<>();
+        dialog.setTitle("Add Record");
+        dialog.setHeaderText("Fill the form to add a new record for " + patient.getName() + " " + patient.getSurname());
+
+        ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        TextField medicalRecordField = new TextField();
+        medicalRecordField.setPromptText("Medical Record");
+
+        grid.add(new Label("Medical Record:"), 0, 0);
+        grid.add(medicalRecordField, 1, 0);
+
+        dialog.getDialogPane().setContent(grid);
+
+        Node saveButton = dialog.getDialogPane().lookupButton(saveButtonType);
+        saveButton.setDisable(true);
+
+        medicalRecordField.textProperty().addListener((observable, oldValue, newValue) -> {
+            saveButton.setDisable(newValue.trim().isEmpty());
+        });
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == saveButtonType) {
+                return new Record(patient, medicalRecordField.getText());
+            }
+            return null;
+        });
+
+        Optional<Record> result = dialog.showAndWait();
+        result.ifPresent(newRecord -> {
+            // Acción para agregar un nuevo Record
+            String url = ServiceResponse.SERVER + "/records";
+            ServiceResponse.getResponseAsync(url, newRecord.toJson(), "POST")
+                    .thenApply(json -> gson.fromJson(json, RecordResponse.class))
+                    .thenAccept(response -> {
+                        if (response.isOk()) {
+                            Platform.runLater(() -> {
+                                MessageUtils.showMessage("Success", "Record Created successfully");
+                                loadRecord(); // Recargar la lista de records
+                            });
+                        } else {
+                            Platform.runLater(() -> MessageUtils.showError("Error", response.getError()));
+                        }
+                    })
+                    .exceptionally(ex -> {
+                        Platform.runLater(() -> MessageUtils.showError("Error", "Failed to create Record"));
+                        return null;
+                    });
+        });
     }
 }

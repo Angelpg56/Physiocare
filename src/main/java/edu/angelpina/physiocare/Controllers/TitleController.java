@@ -32,13 +32,17 @@ public class TitleController implements Initializable {
     private Stage stage;
     private Scene scene;
     Gson gson = new Gson();
-    /*Gson gson = new GsonBuilder()
-            .excludeFieldsWithoutExposeAnnotation() // Excludes fields without @Expose
-            .enableComplexMapKeySerialization()
-            .create();*/
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        Platform.runLater(this::loadTitle);
+    }
+
+    private void loadTitle() {
         if(!ServiceResponse.isToken()) {
             btnLogin.setDisable(false);
             btnLogout.setDisable(true);
@@ -150,9 +154,13 @@ public class TitleController implements Initializable {
                                                 if(loader.getController() instanceof PatientsController) {
                                                     PatientsController controller = loader.getController();
                                                     controller.setStage(stage);
+                                                    System.out.println("PatientsController");
                                                 } else if(loader.getController() instanceof PhysiosController) {
                                                     PhysiosController controller = loader.getController();
                                                     controller.setStage(stage);
+                                                    System.out.println("PhysiosController");
+                                                } else {
+                                                    System.out.println("Unknown controller");
                                                 }
                                                 stage.setScene(scene);
                                                 stage.show();

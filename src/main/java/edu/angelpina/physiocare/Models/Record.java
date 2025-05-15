@@ -1,5 +1,6 @@
 package edu.angelpina.physiocare.Models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Record {
@@ -8,6 +9,14 @@ public class Record {
     private String medicalRecord;
     private List<Appointment> appointments;
     private String __v;
+
+    public Record() {
+    }
+    public Record(Patient patient, String medicalRecord) {
+        this.patient = patient;
+        this.medicalRecord = medicalRecord;
+        this.appointments = new ArrayList<>();
+    }
 
     public String get_id() {
         return _id;
@@ -51,16 +60,21 @@ public class Record {
 
     @Override
     public String toString() {
-        StringBuilder appointments = new StringBuilder();
+        String appointments = " appointments";
         if (this.appointments.isEmpty()) {
-            appointments.append("Sin appointments");
+            appointments = "Sin" + appointments;
         } else {
-            for(Appointment a: this.appointments) {
-                appointments.append(a.toString()).append(", ");
-            }
+                appointments = this.appointments.size() + appointments;
         }
         return this.patient.getName() + " " + patient.getSurname() +
                 ": medicalRecord='" + this.medicalRecord + '\'' +
-                " - appointments='" + appointments + "';";
+                " - " + appointments;
+    }
+
+    public String toJson() {
+        return "{" +
+                "\"patient\": \"" + this.patient.getId() + "\", " +
+                "\"medicalRecord\": \"" + this.medicalRecord + "\"" +
+                "}";
     }
 }

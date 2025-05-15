@@ -33,6 +33,10 @@ public class PhysiosController {
 
     @FXML
     public void initialize() {
+        Platform.runLater(this::loadPhysios);
+    }
+
+    private void loadPhysios() {
         String url = ServiceResponse.SERVER + "/physios";
         ServiceResponse.getResponseAsync(url, null, "GET")
                 .thenApply(json -> gson.fromJson(json, PhysiosResponse.class))
@@ -268,10 +272,17 @@ public class PhysiosController {
     }
 
     public void goToTitle(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("/edu/angelpina/physiocare/Title.fxml"));
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.show();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/edu/angelpina/physiocare/Title.fxml"));
+            Parent root = loader.load();
+            TitleController controller = loader.getController();
+            controller.setStage(stage);
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            MessageUtils.showError("Error", "Failed to load Records view");
+        }
     }
 }
