@@ -3,6 +3,10 @@ module edu.angelpina.physiocare {
     requires javafx.fxml;
     requires com.google.gson;
     requires java.sql;
+    requires kernel;
+    requires layout;
+    requires com.jcraft.jsch;
+    requires org.slf4j;
 
     opens edu.angelpina.physiocare to javafx.fxml;
     opens edu.angelpina.physiocare.Utils;

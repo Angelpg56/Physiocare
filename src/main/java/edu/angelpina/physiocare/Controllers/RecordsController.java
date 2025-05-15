@@ -5,6 +5,7 @@ import edu.angelpina.physiocare.Models.*;
 import edu.angelpina.physiocare.Models.Record;
 import edu.angelpina.physiocare.Services.ServiceResponse;
 import edu.angelpina.physiocare.Utils.MessageUtils;
+import edu.angelpina.physiocare.Utils.PdfUtils;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -54,14 +55,14 @@ public class RecordsController {
     public void initialize() {
         Platform.runLater(() -> {
             if (patient != null) {
-                loadRecord();
+                loadRecord(false);
             } else {
                 MessageUtils.showError("Error", "Patient is null");
             }
         });
     }
 
-    private void loadRecord() {
+    private void loadRecord(boolean newRecord) {
         titleLabel.setText("Records of " + patient.getName());
         String url = ServiceResponse.SERVER + "/records/patient/" + patient.getId();
         ServiceResponse.getResponseAsync(url, null, "GET")
@@ -78,6 +79,9 @@ public class RecordsController {
                                     }
                                 }
                             });
+                            if(newRecord) {
+                                PdfUtils.CreatePdf(response.getResultado());
+                            }
                         });
                     } else {
                         Platform.runLater(() -> MessageUtils.showError("Error", response.getError()));
@@ -224,7 +228,7 @@ public class RecordsController {
                         if (response.isOk()) {
                             Platform.runLater(() -> {
                                 MessageUtils.showMessage("Success", "Record Created successfully");
-                                loadRecord(); // Recargar la lista de records
+                                loadRecord(true); // Recargar la lista de records
                             });
                         } else {
                             Platform.runLater(() -> MessageUtils.showError("Error", response.getError()));
