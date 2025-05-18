@@ -13,7 +13,7 @@
     <Label fx:id="medicalRecordLabel" text="Medical Record: " style="-fx-font-size: 16px;"/>
     <ListView fx:id="appointmentList" prefHeight="400.0" prefWidth="600.0"/>
     <HBox alignment="CENTER" spacing="10.0">
-        <Button text="Add Appointment" onAction="#addAppointment"/>
+        <Button fx:id="btnAdd" text="Add Appointment" onAction="#addAppointment"/>
         <Button text="Back to Records" onAction="#goBack"/>
     </HBox>
 </VBox>
