@@ -187,16 +187,29 @@ public class TitleController implements Initializable {
                 String resource = redirect.equals("Patient") ?
                         "/edu/angelpina/physiocare/Patients.fxml" :
                         "/edu/angelpina/physiocare/Physios.fxml";
-                Parent root;
+                Parent root = null;
+                System.out.println(resource);
                 try {
-                    root = FXMLLoader.load(getClass().getResource(resource));
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
+                    root = loader.load();
+                    stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                    scene = new Scene(root);
+                    if(loader.getController() instanceof PatientsController) {
+                        PatientsController controller = loader.getController();
+                        controller.setStage(stage);
+                        System.out.println("PatientsController");
+                    } else if(loader.getController() instanceof PhysiosController) {
+                        PhysiosController controller = loader.getController();
+                        controller.setStage(stage);
+                        System.out.println("PhysiosController");
+                    } else {
+                        System.out.println("Unknown controller");
+                    }
+                    stage.setScene(scene);
+                    stage.show();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                scene = new Scene(root);
-                stage.setScene(scene);
-                stage.show();
             }
         }
     }
