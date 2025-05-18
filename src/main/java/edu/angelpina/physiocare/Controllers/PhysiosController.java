@@ -1,11 +1,11 @@
 package edu.angelpina.physiocare.Controllers;
 
 import com.google.gson.Gson;
-import edu.angelpina.physiocare.Models.Physio;
-import edu.angelpina.physiocare.Models.PhysioResponse;
-import edu.angelpina.physiocare.Models.PhysiosResponse;
+import edu.angelpina.physiocare.Models.*;
+import edu.angelpina.physiocare.Models.Record;
 import edu.angelpina.physiocare.Services.ServiceResponse;
 import edu.angelpina.physiocare.Utils.MessageUtils;
+import edu.angelpina.physiocare.Utils.PdfUtils;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -19,11 +19,14 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PhysiosController {
     public ListView physiosList;
+    private List<Physio> physios;
     public Button btnAdd;
+    public Button btnSSalary;
     Gson gson = new Gson();
     public Stage stage;
 
@@ -44,6 +47,7 @@ public class PhysiosController {
                     if (response.isOk()) {
                         Platform.runLater(() -> {
                             physiosList.getItems().setAll(response.getResultado());
+                            physios = response.getResultado();
 
                             physiosList.setOnMouseClicked(event -> {
                                 if (event.getClickCount() == 2) {
@@ -65,6 +69,7 @@ public class PhysiosController {
 
         if(ServiceResponse.getUserRol().equals("physio")) {
             btnAdd.setDisable(true);
+            btnSSalary.setDisable(true);
         }
     }
 
@@ -284,5 +289,76 @@ public class PhysiosController {
             e.printStackTrace();
             MessageUtils.showError("Error", "Failed to load Records view");
         }
+    }
+
+    public void SendSalary(ActionEvent event) {
+
+        String url = ServiceResponse.SERVER + "/records";
+        ServiceResponse.getResponseAsync(url, null, "GET")
+                .thenApply(json -> gson.fromJson(json, RecordsResponse.class))
+                .thenAccept(response -> {
+                    if (response.isOk()) {
+                        Platform.runLater(() -> {
+                            Map<Physio, Map<Patient, List<Appointment>>> physioAppointmentsMap =
+                                    organizeByPhysios(response.getResultado());
+
+                            // show physioAppointmentsMap in console
+                            /*for (Map.Entry<Physio, Map<Patient, List<Appointment>>> entry : physioAppointmentsMap.entrySet()) {
+                                System.out.println("Physio: " + entry.getKey().getName());
+                                for (Map.Entry<Patient, List<Appointment>> patientEntry : entry.getValue().entrySet()) {
+                                    System.out.println("  Patient: " + patientEntry.getKey().getName());
+                                    for (Appointment appointment : patientEntry.getValue()) {
+                                        System.out.println("    Appointment: " + appointment.getDate());
+                                    }
+                                }
+                            }*/
+
+                            // Generate PDFs for each Physio
+                            for (Map.Entry<Physio, Map<Patient, List<Appointment>>> entry : physioAppointmentsMap.entrySet()) {
+                                PdfUtils.CreatePdfPhysioSalary(entry.getKey(), entry.getValue());
+                            }
+                        });
+                    } else {
+                        Platform.runLater(() -> MessageUtils.showError("Error", response.getError()));
+                    }
+                })
+                .exceptionally(ex -> {
+                    ex.printStackTrace(); // Log the exception
+                    Platform.runLater(() -> MessageUtils.showError("Error", "Failed to fetch Records"));
+                    return null;
+                });
+    }
+
+    public Map<Physio, Map<Patient, List<Appointment>>> organizeByPhysios(List<Record> records) {
+        Map<Physio, Map<Patient, List<Appointment>>> result = new HashMap<>();
+
+        for (Physio physio : physios) {
+            result.put(physio, new HashMap<>());
+        }
+
+        for (Record record : records) {
+            Patient patient = record.getPatient();
+            List<Appointment> appointments = record.getAppointments();
+
+            for (Appointment appointment : appointments) {
+                AtomicBoolean found = new AtomicBoolean(false);
+                result.keySet().forEach(key -> {
+                    if (key.getId().equals(appointment.getPhysio().getId())) {
+                        result.get(key).keySet().forEach( k -> {
+                                    if (k.getId().equals(patient.getId())) {
+                                        result.get(key).get(k).add(appointment);
+                                        found.set(true);
+                                    }
+                        });
+                        if (!found.get()) {
+                            result.get(key).put(patient, new ArrayList<>());
+                            result.get(key).get(patient).add(appointment);
+                        }
+                    }
+                });
+            }
+        }
+
+        return result;
     }
 }

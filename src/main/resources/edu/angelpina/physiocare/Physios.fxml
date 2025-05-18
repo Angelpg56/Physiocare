@@ -10,6 +10,7 @@
     <ListView fx:id="physiosList" prefHeight="400.0" prefWidth="600.0"/>
     <HBox alignment="CENTER" spacing="10.0">
         <Button fx:id="btnAdd" text="Add Patient" onAction="#addPhysio"/>
+        <Button fx:id="btnSSalary" text="Send Salary" onAction="#SendSalary"/>
         <Button text="Back to Title" onAction="#goToTitle"/>
     </HBox>
 </VBox>
