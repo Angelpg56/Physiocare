@@ -80,7 +80,7 @@ public class RecordsController {
                                 }
                             });
                             if(newRecord) {
-                                PdfUtils.CreatePdf(response.getResultado());
+                                PdfUtils.CreatePdfRecords(response.getResultado());
                             }
                         });
                     } else {

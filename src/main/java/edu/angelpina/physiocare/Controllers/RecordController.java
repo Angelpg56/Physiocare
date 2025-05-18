@@ -4,7 +4,9 @@ import com.google.gson.Gson;
 import edu.angelpina.physiocare.Models.*;
 import edu.angelpina.physiocare.Models.Record;
 import edu.angelpina.physiocare.Services.ServiceResponse;
+import edu.angelpina.physiocare.Utils.EmailSender;
 import edu.angelpina.physiocare.Utils.MessageUtils;
+import edu.angelpina.physiocare.Utils.PdfUtils;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -27,6 +29,7 @@ public class RecordController {
     public Label titleLabel;
     public ListView appointmentList;
     public Label medicalRecordLabel;
+    public Button btnAdd;
     private Stage stage;
     private Scene scene;
     Gson gson = new Gson();
@@ -73,6 +76,9 @@ public class RecordController {
                         }
                     }
                 });
+                if (record.getAppointments().size() >= 10) {
+                    btnAdd.setDisable(true);
+                }
             } else {
                 System.out.println("Record is null");
             }
@@ -196,6 +202,9 @@ public class RecordController {
                                                     this.record = response2.getResultado();
                                                     MessageUtils.showMessage("Success", "Appointment Created successfully");
                                                     initialize(); // Reload the appointments list
+                                                    if (this.record.getAppointments().size() >= 8) {
+                                                        PdfUtils.CreatePdfPatientAppointments(this.record);
+                                                    }
                                                 });
                                             } else {
                                                 Platform.runLater(() -> MessageUtils.showError("Error", response2.getError()));
