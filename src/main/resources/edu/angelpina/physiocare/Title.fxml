@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="edu.angelpina.physiocare.Controllers.TitleController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-    </padding>
+<VBox alignment="CENTER" spacing="25.0" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="edu.angelpina.physiocare.Controllers.TitleController"
+      style="-fx-background-color: #ecf0f1; -fx-padding: 40;">
+    <Label fx:id="welcomeText" text="Welcome to Physiocare"
+           style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
 
-    <Label fx:id="welcomeText" text="Welcome to Physiocare"/>
-    <Button text="Go to Patients" onAction="#goToPatients"/>
-    <Button text="Go to Physios" onAction="#goToPhysios"/>
-    <Button fx:id="btnLogin" text="Login" onAction="#login"/>
-    <Button fx:id="btnLogout" text="Logout" onAction="#logout"/>
+    <VBox alignment="CENTER" spacing="15.0">
+        <Button text="Go to Patients" onAction="#goToPatients"
+                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-min-width: 200; -fx-padding: 10;"/>
+        <Button text="Go to Physios" onAction="#goToPhysios"
+                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-min-width: 200; -fx-padding: 10;"/>
+        <Button fx:id="btnLogin" text="Login" onAction="#login"
+                style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-min-width: 200; -fx-padding: 10;"/>
+        <Button fx:id="btnLogout" text="Logout" onAction="#logout"
+                style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-min-width: 200; -fx-padding: 10;"/>
+    </VBox>
 </VBox>
